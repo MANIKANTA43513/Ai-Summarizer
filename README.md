@@ -188,7 +188,7 @@ Output:
 - Focused on simplicity and clarity over complexity
 
 ---
-
+[Render link} : https://ai-summarizer-oqlx.onrender.com/
 📄 License
 
 This project is created for an AI Developer Intern assignment and is intended for evaluation purposes.
