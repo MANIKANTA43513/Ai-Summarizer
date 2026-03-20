@@ -10,7 +10,7 @@ function App() {
     console.log("BUTTON CLICKED");
 
     try {
-      const response = await fetch("https://ai-summarizer-oqlx.onrender.com/", {
+      const response = await fetch("https://ai-summarizer-oqlx.onrender.com/api/summarize", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
