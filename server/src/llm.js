@@ -1,40 +1,86 @@
-import OpenAI from "openai";
-
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+import fetch from "node-fetch";
 
 export async function summarizeText(text) {
-  if (!text || text.length < 20) {
-    throw new Error("Text too short");
-  }
-
   try {
-    const completion = await client.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: [
-        {
-          role: "user",
-          content: `Give:
-1. Summary
-2. Key Points
-3. Sentiment
+    const response = await fetch(
+      `${process.env.OPENAI_BASE_URL}/chat/completions`,
+      {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "user",
+              content: `Analyze the following text and respond ONLY in JSON.
+
+Rules:
+- summary: 2-3 lines
+- keyPoints: EXACTLY 3 bullet points (strictly 3, not less, not more)
+- sentiment: one word (positive/neutral/negative)
+
+Format:
+{
+  "summary": "...",
+  "keyPoints": ["point1", "point2", "point3"],
+  "sentiment": "positive"
+}
 
 Text:
-${text}`,
-        },
-      ],
-    });
+${text}`
+            }
+          ],
+          temperature: 0.7
+        })
+      }
+    );
 
-    const output = completion.choices[0].message.content;
+    const data = await response.json();
+    console.log("FULL RESPONSE:", data);
+
+    let content = data?.choices?.[0]?.message?.content || "{}";
+
+    let parsed;
+
+    try {
+      parsed = JSON.parse(content);
+
+      // ✅ Ensure keyPoints is array
+      if (!parsed.keyPoints || !Array.isArray(parsed.keyPoints)) {
+        parsed.keyPoints = [];
+      }
+
+      // ✅ Ensure exactly 3 points
+      while (parsed.keyPoints.length < 3) {
+        parsed.keyPoints.push("Additional insight not generated");
+      }
+
+    } catch (err) {
+      console.log("JSON parse failed");
+
+      parsed = {
+        summary: content,
+        keyPoints: [],
+        sentiment: "neutral"
+      };
+    }
 
     return {
-      summary: output,
-      keyPoints: ["Generated from AI"],
-      sentiment: "positive",
+      summary: parsed.summary || "No summary",
+      keyPoints: parsed.keyPoints || [],
+      sentiment: parsed.sentiment || "neutral"
     };
+
   } catch (error) {
-    console.error("OPENAI ERROR:", error.message);
-    throw new Error("failed to summarize text");
+    console.error("ERROR:", error.message);
+
+    return {
+      summary: "Error generating summary",
+      keyPoints: [],
+      sentiment: "neutral"
+    };
   }
 }
