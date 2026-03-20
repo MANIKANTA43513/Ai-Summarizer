@@ -10,33 +10,23 @@ function App() {
     console.log("BUTTON CLICKED");
 
     try {
-      const response = await fetch(
-        "https://ai-summarizer-oqlx.onrender.com/api/summarize", // ✅ YOUR BACKEND
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            text: inputText,
-          }),
-        }
-      );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("Server Error:", errorText);
-        return;
-      }
+      const response = await fetch("http://localhost:5000/api/summarize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: inputText }),
+      });
 
       const data = await response.json();
-      console.log("RESPONSE:", data);
 
-      setSummary(data.summary || "");
+      console.log("FRONTEND DATA:", data);
+
+      setSummary(data.summary);
       setKeyPoints(data.keyPoints || []);
-      setSentiment(data.sentiment || "");
+      setSentiment(data.sentiment);
     } catch (error) {
-      console.error("Fetch Error:", error);
+      console.error("FRONTEND ERROR:", error);
     }
   };
 
@@ -45,14 +35,14 @@ function App() {
       <h1>AI Summarizer</h1>
 
       <textarea
-        rows="5"
-        cols="50"
+        rows="6"
+        cols="60"
+        placeholder="Enter text here..."
         value={inputText}
         onChange={(e) => setInputText(e.target.value)}
-        placeholder="Enter text here..."
       />
 
-      <br /><br />
+      <br />
       <button onClick={handleAnalyze}>Analyze</button>
 
       <h2>Summary:</h2>
