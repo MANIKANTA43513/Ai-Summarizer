@@ -2,13 +2,13 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: process.env.OPENAI_BASE_URL || "https://api.openai.com/v1",
+  baseURL: "https://api.openai.com/v1",
 });
 
 export async function summarizeText(text) {
   try {
     const response = await client.chat.completions.create({
-      model: "gpt-3.5-turbo",
+      model: "openai/gpt-3.5-turbo",
       messages: [
         {
           role: "system",
