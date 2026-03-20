@@ -2,7 +2,7 @@ import OpenAI from "openai";
 
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
-  baseURL: "https://api.openai.com/v1",
+  baseURL: "https://openrouter.ai/api/v1",
 });
 
 export async function summarizeText(text) {
@@ -12,8 +12,7 @@ export async function summarizeText(text) {
       messages: [
         {
           role: "system",
-          content:
-            "You are an AI that summarizes text. Give summary, key points, and sentiment.",
+          content: "Summarize text, give key points and sentiment.",
         },
         {
           role: "user",
@@ -26,19 +25,16 @@ export async function summarizeText(text) {
 
     return {
       summary: output,
-      keyPoints: [
-        "Auto-generated point 1",
-        "Auto-generated point 2",
-        "Auto-generated point 3",
-      ],
+      keyPoints: ["Point 1", "Point 2", "Point 3"],
       sentiment: "positive",
     };
   } catch (error) {
     console.error("FULL ERROR:", error.message);
 
     return {
-      summary: error.message, 
+      summary: error.message,
       keyPoints: [],
       sentiment: "neutral",
     };
   }
+}
