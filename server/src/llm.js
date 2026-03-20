@@ -34,12 +34,11 @@ export async function summarizeText(text) {
       sentiment: "positive",
     };
   } catch (error) {
-    console.error("LLM ERROR:", error.message);
+    console.error("FULL ERROR:", error.message);
 
     return {
-      summary: "Error generating summary",
+      summary: error.message, 
       keyPoints: [],
       sentiment: "neutral",
     };
   }
-}
