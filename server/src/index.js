@@ -13,7 +13,6 @@ dotenv.config({
   path:path.join(__dirname, "../.env")
 });
 
-process.env.OPENAI_API_KEY = "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";
 
 console.log("API KEY:",
 process.env.OPENAI_API_KEY);
