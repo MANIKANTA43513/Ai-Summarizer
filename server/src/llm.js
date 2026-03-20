@@ -3,6 +3,10 @@ import OpenAI from "openai";
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
   baseURL: "https://openrouter.ai/api/v1",
+  defaultHeaders: {
+    "HTTP-Referer": "https://ai-summarizer-a4ucc7k3e-manikantas-projects-0870a117.vercel.app/",
+    "X-Title": "AI Summarizer",
+  },
 });
 
 export async function summarizeText(text) {
