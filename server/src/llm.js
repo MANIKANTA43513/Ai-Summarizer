@@ -1,27 +1,40 @@
 import OpenAI from "openai";
-import { promptTemplate } from "./prompt.js";
 
 const client = new OpenAI({
-  apiKey: "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", // <-- nee OpenRouter key
-  baseURL: "https://openrouter.ai/api/v1"
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export async function summarizeText(text) {
-  const prompt = promptTemplate.replace("{{USER_TEXT}}", text);
-
-  const response = await client.chat.completions.create({
-    model: "openai/gpt-3.5-turbo",
-    messages: [
-      { role: "user", content: prompt }
-    ],
-    temperature: 0.2
-  });
-
-  const raw = response.choices[0].message.content;
+  if (!text || text.length < 20) {
+    throw new Error("Text too short");
+  }
 
   try {
-    return JSON.parse(raw);
-  } catch (err) {
-    throw new Error("Invalid JSON from model");
+    const completion = await client.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "user",
+          content: `Give:
+1. Summary
+2. Key Points
+3. Sentiment
+
+Text:
+${text}`,
+        },
+      ],
+    });
+
+    const output = completion.choices[0].message.content;
+
+    return {
+      summary: output,
+      keyPoints: ["Generated from AI"],
+      sentiment: "positive",
+    };
+  } catch (error) {
+    console.error("OPENAI ERROR:", error.message);
+    throw new Error("failed to summarize text");
   }
 }

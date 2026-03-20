@@ -1,27 +1,42 @@
 import { useState } from "react";
 
 function App() {
-  const [text, setText] = useState("");
-  const [result, setResult] = useState(null);
+  const [inputText, setInputText] = useState("");
+  const [summary, setSummary] = useState("");
+  const [keyPoints, setKeyPoints] = useState([]);
+  const [sentiment, setSentiment] = useState("");
 
   const handleAnalyze = async () => {
     console.log("BUTTON CLICKED");
 
     try {
-      const res = await fetch("http://localhost:5000/api/summarize", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ text })
-      });
+      const response = await fetch(
+        "https://ai-summarizer-oqlx.onrender.com/api/summarize", // ✅ YOUR BACKEND
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            text: inputText,
+          }),
+        }
+      );
 
-      const data = await res.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Server Error:", errorText);
+        return;
+      }
+
+      const data = await response.json();
       console.log("RESPONSE:", data);
-      setResult(data);
 
-    } catch (err) {
-      console.error("ERROR:", err);
+      setSummary(data.summary || "");
+      setKeyPoints(data.keyPoints || []);
+      setSentiment(data.sentiment || "");
+    } catch (error) {
+      console.error("Fetch Error:", error);
     }
   };
 
@@ -31,36 +46,27 @@ function App() {
 
       <textarea
         rows="5"
-        cols="40"
+        cols="50"
+        value={inputText}
+        onChange={(e) => setInputText(e.target.value)}
         placeholder="Enter text here..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
       />
 
       <br /><br />
+      <button onClick={handleAnalyze}>Analyze</button>
 
-      <button onClick={handleAnalyze}>
-        Analyze
-      </button>
+      <h2>Summary:</h2>
+      <p>{summary}</p>
 
-      <br /><br />
+      <h2>Key Points:</h2>
+      <ul>
+        {keyPoints.map((point, index) => (
+          <li key={index}>{point}</li>
+        ))}
+      </ul>
 
-      {result && (
-        <div>
-          <h3>Summary:</h3>
-          <p>{result.summary}</p>
-
-          <h3>Key Points:</h3>
-          <ul>
-            {result.keyPoints?.map((p, i) => (
-              <li key={i}>{p}</li>
-            ))}
-          </ul>
-
-          <h3>Sentiment:</h3>
-          <p>{result.sentiment}</p>
-        </div>
-      )}
+      <h2>Sentiment:</h2>
+      <p>{sentiment}</p>
     </div>
   );
 }
